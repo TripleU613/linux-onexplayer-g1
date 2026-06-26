@@ -1,0 +1,12 @@
+[Unit]
+Description=Wait for USB devices then force hubs to stay powered
+Before=gdm.service display-manager.service
+After=systemd-udevd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/usb-hub-poweron.sh
+
+[Install]
+WantedBy=multi-user.target
