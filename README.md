@@ -69,3 +69,16 @@ from the handheld's top-right edge.
 Fix: re-arrange once in **Settings > Displays** (GNOME re-saves for the new connector),
 or run `display/relayout.py` (edit the connectors/positions inside first) to apply and
 persist a layout from the CLI.
+
+## 8. Controller RGB (HHD detects it but never lights it)
+[Handheld Daemon](https://github.com/hhd-dev/hhd) (`hhd@user`) drives the G1 A controller, but RGB has **two** bugs on this device:
+
+**(a) Controller won't start → RGB plugin never runs.** HHD's G1 profile hard-requires the detachable keyboard's touchpad interface (`6080:8060`). When it isn't attached, HHD loops *"controllers disconnected, restarting after 3s"* forever and never starts the `controller_rgb` plugin. Make that device optional in `hhd/device/oxp/base.py` — the `GenericGamepadEvdev` block commented `# Touchpad keyboard` (`vid=[0x6080], pid=[0x8060]`): set `required=False` and `requires_start=False`, then `sudo systemctl restart hhd@$USER`. (Lives in HHD's package → re-apply after HHD updates.)
+
+**(b) Even running, HHD never writes the RGB bytes.** It logs `Setting RGB…` but the actual device write (`OXP C: …` in `hid_v1.py`) never fires — nothing reaches `/dev/hidraw1`. Workaround: write the OXP vendor command straight to the device (format reverse-engineered from `hhd/device/oxp/hid_v1.py`):
+```sh
+sudo cp rgb/oxp-rgb.py /usr/local/bin/ && sudo chmod +x /usr/local/bin/oxp-rgb.py
+sudo cp rgb/oxp-rgb.conf /etc/oxp-rgb.conf       # mode=effect|solid; effect=aurora/flowing/neon/cyberpunk/...; or r/g/b
+sudo cp rgb/oxp-rgb.service /etc/systemd/system/ && sudo systemctl enable --now oxp-rgb
+```
+Self-contained (no HHD import), finds the hidraw by VID:PID `1a2c:b001`, runs alongside HHD (concurrent hidraw write is fine). Sides: `1`=left stick, `2`=right stick, `3`=center V, `4`=touch-kbd, `5`=front triangle.

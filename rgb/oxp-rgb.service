@@ -1,0 +1,13 @@
+[Unit]
+Description=OneXPlayer G1 controller RGB (direct write; HHD pipeline workaround)
+After=hhd@tripleu.service multi-user.target
+Wants=hhd@tripleu.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/local/bin/oxp-rgb.py
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
