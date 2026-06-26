@@ -37,3 +37,25 @@ GNOME auto-brightness dims off the `bmi260` (an IMU, not a light sensor).
 ```sh
 brightness/disable-auto-brightness.sh
 ```
+
+## 5. GDM shows a "GDM Greeter" lock screen, no user list
+On GNOME 50 the greeter launched a full `ubuntu` desktop (`gnome-shell --mode=ubuntu`) instead of the login screen, because `/etc/dconf/profile/gdm` was missing its `file-db` line (so `session-name=gnome-login` never loaded) and the per-seat state had a saved `ubuntu` session pinning it. Reinstalling `gdm3` does **not** fix it — that profile is generated at runtime, not shipped by the package.
+```sh
+sudo greeter/fix-gdm-greeter.sh
+# greeter then runs `gnome-shell --mode=gdm` and lists your user
+```
+
+## 6. USB peripherals on the internal hub flap / `error -71` (partial)
+The G1's internal hub (QinHeng `1a86:8091`) and passive hubs (Genesys `05e3:0610`) are power-marginal — hot-plugged receivers `attempt power cycle` / `error -71` and drag siblings (incl. the built-in keyboard) offline.
+
+What helps — add to `GRUB_CMDLINE_LINUX_DEFAULT`, then `sudo update-grub`:
+```sh
+usbcore.autosuspend=-1 usbcore.old_scheme_first=1 usbcore.quirks=05e3:0610:ej,1ea7:0002:e usbhid.quirks=0x05e3:0x0610:0x04
+```
+Plus a boot service that forces every USB port to stay powered (runs `Before=gdm`), and a udev rule keeping hubs powered:
+```sh
+sudo cp usb/usb-hub-poweron.sh /usr/local/bin/ && sudo chmod +x /usr/local/bin/usb-hub-poweron.sh
+sudo cp usb/usb-hub-poweron.service /etc/systemd/system/ && sudo systemctl enable usb-hub-poweron
+sudo cp usb/99-usb-autosuspend.rules /etc/udev/rules.d/ && sudo udevadm control --reload-rules
+```
+Bare low-power receivers then work in a strong port. **Combo (keyboard+mouse+speaker) receivers have an internal hub + amp → too much draw for a bare port; use a powered hub.** **Still open:** a 2.4 GHz receiver that works at the greeter goes dead in-session after login (greeter↔session device-handoff race) — not yet root-caused.
