@@ -59,3 +59,13 @@ sudo cp usb/usb-hub-poweron.service /etc/systemd/system/ && sudo systemctl enabl
 sudo cp usb/99-usb-autosuspend.rules /etc/udev/rules.d/ && sudo udevadm control --reload-rules
 ```
 Bare low-power receivers then work in a strong port. **Combo (keyboard+mouse+speaker) receivers have an internal hub + amp → too much draw for a bare port; use a powered hub.** **Still open:** a 2.4 GHz receiver that works at the greeter goes dead in-session after login (greeter↔session device-handoff race) — not yet root-caused.
+## 7. External monitor: cursor "leaks" to it / saved layout not restoring
+GNOME keys its multi-monitor layout (`~/.config/monitors.xml`) by **connector name**
+(e.g. `DP-2`). If the port/connector changes (`DP-2` -> `DP-3` after a replug/reboot),
+the saved layout stops matching and GNOME auto-arranges badly — the small handheld
+screen lands at the top-left of the big monitor, so the cursor spills onto the monitor
+from the handheld's top-right edge.
+
+Fix: re-arrange once in **Settings > Displays** (GNOME re-saves for the new connector),
+or run `display/relayout.py` (edit the connectors/positions inside first) to apply and
+persist a layout from the CLI.
