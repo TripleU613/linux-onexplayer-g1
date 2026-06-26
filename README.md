@@ -97,3 +97,18 @@ With the handheld (`eDP-1`) stacked directly **below** the external monitor (edg
 gsettings set org.gnome.desktop.interface enable-hot-corners false
 ```
 If it still triggers, it's the monitor boundary itself: in **Settings → Displays** offset the handheld horizontally (or move it beside the big screen) so its top edge isn't flush against the screen above — see also section 7. (`blur-my-shell` can additionally make that panel render glitchy; exclude the Panel in its prefs if so.)
+
+## 11. Game controller not detected by Steam (pad nodes end up mode 000 / no uaccess)
+The built-in Xbox pad's input nodes (`/dev/input/js0`, `eventN`) came up **mode 000 with the
+uaccess ACL masked to `---`** — so no user app, Steam included, could read it ("no controllers
+available"), even though `xpad`/`js0` exist in the kernel. The joystick's `uaccess` tag wasn't
+applied (keyboard/touchpad were unaffected — joystick-specific). Drop-in fix:
+```sh
+sudo cp controller/71-controller-access.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger --subsystem-match=input
+# current session, until next replug (input-group membership applies on next login):
+sudo setfacl -m u:$USER:rw,m::rw /dev/input/js0 /dev/input/event*   # the pad nodes
+```
+Then restart Steam so it re-scans (it ignores controllers it couldn't read at startup). Tip:
+native-gamepad games (War Thunder) → set Steam Input to passthrough/off; no-gamepad games
+(Minecraft Java) → use a keyboard/mouse Steam Input layout.

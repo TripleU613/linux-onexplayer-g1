@@ -1,0 +1,6 @@
+# OneXPlayer G1 A: the built-in Xbox pad's input nodes (js0 / eventN) can come up
+# mode 000 with the uaccess ACL masked to "---", so no user app (Steam included)
+# can read the controller. Joystick uaccess wasn't being applied (keyboard/touchpad
+# were fine — joystick-specific). Grant controllers uaccess + input-group access.
+SUBSYSTEM=="input", ENV{ID_INPUT_JOYSTICK}=="1", TAG+="uaccess", MODE="0660", GROUP="input"
+KERNEL=="js[0-9]*", SUBSYSTEM=="input", TAG+="uaccess", MODE="0660", GROUP="input"
