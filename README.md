@@ -90,3 +90,10 @@ sudo cp keyboard/62-amira-kbd-fkeys.hwdb /etc/udev/hwdb.d/
 sudo systemd-hwdb update && sudo udevadm trigger -s input --action=change
 ```
 Verify with `sudo evtest /dev/input/eventN` (the AMIRA keyboard) — toggling should no longer emit F13/F14/F17. The mouse↔keypad switch keeps working.
+
+## 10. Quick Settings (power/restart) menu pops up randomly near the bottom of the screen
+With the handheld (`eDP-1`) stacked directly **below** the external monitor (edges flush over the same x-range), moving the cursor *down across the monitor boundary* lands on the handheld's **top edge** — GNOME's "swipe-down → Quick Settings" zone — so the top-right menu opens on its own. Hot corners being enabled adds more stray edge triggers.
+```sh
+gsettings set org.gnome.desktop.interface enable-hot-corners false
+```
+If it still triggers, it's the monitor boundary itself: in **Settings → Displays** offset the handheld horizontally (or move it beside the big screen) so its top edge isn't flush against the screen above — see also section 7. (`blur-my-shell` can additionally make that panel render glitchy; exclude the Panel in its prefs if so.)
