@@ -1,0 +1,4 @@
+# OneXPlayer G1 A — bmi260 accelerometer is mounted 180° vs the panel,
+# so auto-rotate reads landscape as "bottom-up" and flips to portrait.
+sensor:modalias:acpi:BMI0160*:dmi:*:svnONE-NETBOOK:pnONEXPLAYERG1A:*
+ ACCEL_MOUNT_MATRIX=-1, 0, 0; 0, -1, 0; 0, 0, 1
