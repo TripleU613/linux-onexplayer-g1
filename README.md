@@ -82,3 +82,11 @@ sudo cp rgb/oxp-rgb.conf /etc/oxp-rgb.conf       # mode=effect|solid; effect=aur
 sudo cp rgb/oxp-rgb.service /etc/systemd/system/ && sudo systemctl enable --now oxp-rgb
 ```
 Self-contained (no HHD import), finds the hidraw by VID:PID `1a2c:b001`, runs alongside HHD (concurrent hidraw write is fine). Sides: `1`=left stick, `2`=right stick, `3`=center V, `4`=touch-kbd, `5`=front triangle.
+
+## 9. Mouse↔keypad toggle on the keyboard pops up GNOME Settings
+The detachable keyboard's touchpad (AMIRA-KEYBOAR, USB `6080:8060`) emits `F13`/`F14`/`F17` when you toggle it between **mouse** and **keypad** mode. `F17` matches GNOME's Settings launcher, so every switch-to-keypad opens the Settings app. The mode switch itself is firmware-internal — those F-keys are spurious notifications — so disable just those three scancodes on that one device:
+```sh
+sudo cp keyboard/62-amira-kbd-fkeys.hwdb /etc/udev/hwdb.d/
+sudo systemd-hwdb update && sudo udevadm trigger -s input --action=change
+```
+Verify with `sudo evtest /dev/input/eventN` (the AMIRA keyboard) — toggling should no longer emit F13/F14/F17. The mouse↔keypad switch keeps working.

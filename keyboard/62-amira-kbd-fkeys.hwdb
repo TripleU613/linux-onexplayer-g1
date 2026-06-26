@@ -1,0 +1,8 @@
+# OneXPlayer G1 A detachable keyboard's touchpad (AMIRA-KEYBOAR, USB 6080:8060)
+# emits F13/F14/F17 when you toggle the touchpad between mouse and keypad mode.
+# F17 trips GNOME's Settings launcher. These are spurious notification keys; the
+# mouse<->keypad switch itself is firmware-internal, so disabling them is safe.
+evdev:input:b0003v6080p8060*
+ KEYBOARD_KEY_70068=reserved
+ KEYBOARD_KEY_70069=reserved
+ KEYBOARD_KEY_7006c=reserved
